@@ -1,37 +1,86 @@
 import { Component } from "react";
+import CurrentNumber from "../CurrentNumber";
+import Step from "../Step";
 import AutoClick from "../AutoClick";
 
 
 class Counter extends Component {
     constructor(props) {
-        super(props);
-        this.state = {
-            currentNumber: 0
-        }
+      super(props);
+      this.state = {
+        step: 1,
+        currentNumber: 0,
+        autoClickTimeId: null,
+        autoClickTime: 1000,
+        autoClickWorkTime: null,
+        clickMode: true
+      };
+    }
+  
+    changeStep = (e) => {
+      this.setState( {step: +e.target.value});
     }
 
-    clickHandler = () => {
-        this.setState( (prevState) => ({currentNumber: prevState.currentNumber + this.props.step}));
+    changeCurrenNumber= () => {
+      this.setState( (prevState) => ({currentNumber: prevState.currentNumber + this.state.step}));
     }
 
-    autoClick = (number) => {
-        setInterval(
-            () => this.clickHandler(),
-            number
-        );
+    changeClickMode = () => {
+      const {clickMode} = this.state;
+      this.setState((prevState)=> (
+        {
+          step: prevState.step*(-1),
+          clickMode: !clickMode
+        })
+      );
     }
 
+    changeAutoClickTime = (e) => {
+      this.setState({autoClickTime: (+e.target.value)*1000});
+    }
 
+    autoClick = () => {
+      setInterval(
+          () => this.changeCurrenNumber(),
+          this.state.autoClickTime
+      );
+    }
+
+    componentDidMount() {
+      const start = Date.now();
+      this.setState({
+        autoClickTimeId: setInterval(()=>{
+          if( ( Date.now()- start ) > this.state.autoClickTime) {
+            clearInterval(this.state.autoClickTimeId);
+          } else {
+            this.changeCurrenNumber();
+            this.setState({autoClickWorkTime: (Date.now()- start)/1000 });
+          }
+        },0)
+      })
+    }
+  
     render() {
-        const {currentNumber} = this.state;
-        return (
-            <>
-               <p>Текущее число: {currentNumber}</p>
-               <div><button onClick = {this.clickHandler}>Click</button></div>
-               <AutoClick autoClick={this.autoClick}/>
-            </>
-        );
-    }
-}
+      const {currentNumber, clickMode, autoClickWorkTime} = this.state;
+      return (
+        <>
+          <CurrentNumber currentNumber = {currentNumber}/>
 
-export default Counter;
+          <Step 
+            changeStep = {this.changeStep}
+            clickMode = {clickMode}
+            changeClickMode = {this.changeClickMode}
+            changeCurrenNumber = {this.changeCurrenNumber}
+          />
+
+          <AutoClick 
+            changeAutoClickTime = {this.changeAutoClickTime}
+            clickHandler = {this.autoClick}
+            autoClickWorkTime = {autoClickWorkTime}
+          />
+        </>
+      );
+    }
+  }
+  
+  export default Counter;
