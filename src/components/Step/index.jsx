@@ -7,7 +7,7 @@ class Step extends Component {
             <>
                 <div>Шаг: <input onChange = {changeStep} type="text"/></div>
                 <div>
-                    <button onClick = {changeClickMode}>Click Mode:{clickMode ? "Добавить": "Отнять"}</button>
+                    <button onClick = {changeClickMode}>Click Mode:{clickMode === 1 ? "Добавить": "Отнять"}</button>
                 </div>
                 <div><button onClick = {changeCurrenNumber}>Click</button></div>
             </>

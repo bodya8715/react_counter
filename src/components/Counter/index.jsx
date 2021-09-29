@@ -13,7 +13,7 @@ class Counter extends Component {
         autoClickTimeId: null,
         autoClickTime: 1000,
         autoClickWorkTime: null,
-        clickMode: true
+        clickMode: 1
       };
     }
   
@@ -22,15 +22,13 @@ class Counter extends Component {
     }
 
     changeCurrenNumber= () => {
-      this.setState( (prevState) => ({currentNumber: prevState.currentNumber + this.state.step}));
+      this.setState( (prevState) => ({currentNumber: prevState.currentNumber + this.state.step*this.state.clickMode}));
     }
 
     changeClickMode = () => {
-      const {clickMode} = this.state;
       this.setState((prevState)=> (
         {
-          step: prevState.step*(-1),
-          clickMode: !clickMode
+          clickMode: prevState.clickMode === 1 ? -1 : 1
         })
       );
     }
@@ -39,25 +37,21 @@ class Counter extends Component {
       this.setState({autoClickTime: (+e.target.value)*1000});
     }
 
-    autoClick = () => {
-      setInterval(
-          () => this.changeCurrenNumber(),
-          this.state.autoClickTime
-      );
+    autoClick = (e, number = this.state.autoClickTime) => {
+      let start = Date.now();
+      this.setState({
+        autoClickTimeId: setInterval(()=>{
+          this.changeCurrenNumber();
+          this.setState({autoClickWorkTime: (Date.now() - start)/1000})
+        }, number),
+      });
     }
 
     componentDidMount() {
-      const start = Date.now();
-      this.setState({
-        autoClickTimeId: setInterval(()=>{
-          if( ( Date.now()- start ) > this.state.autoClickTime) {
-            clearInterval(this.state.autoClickTimeId);
-          } else {
-            this.changeCurrenNumber();
-            this.setState({autoClickWorkTime: (Date.now()- start)/1000 });
-          }
-        },0)
-      })
+      this.autoClick(null, 0);
+      setTimeout(() => {
+        clearInterval(this.state.autoClickTimeId);
+      }, 30000)
     }
   
     render() {
@@ -75,7 +69,7 @@ class Counter extends Component {
 
           <AutoClick 
             changeAutoClickTime = {this.changeAutoClickTime}
-            clickHandler = {this.autoClick}
+            autoClick = {this.autoClick}
             autoClickWorkTime = {autoClickWorkTime}
           />
         </>
